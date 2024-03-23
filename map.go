@@ -5,6 +5,7 @@ import (
 	"sync"
 )
 
+// Map all api is same with the sync.Map
 type Map[K comparable, V any] struct {
 	innerMap sync.Map
 }
@@ -22,9 +23,13 @@ func FromMap[K comparable, V any](m map[K]V) *Map[K, V] {
 	return result
 }
 
-func (m *Map[K, V]) Load(k K) (V, bool) {
+func (m *Map[K, V]) Load(k K) (v V, got bool) {
 	item, ok := m.innerMap.Load(k)
-	return item.(V), ok
+	if ok {
+		return item.(V), ok
+	} else {
+		return v, false
+	}
 }
 
 func (m *Map[K, V]) Store(k K, v V) {
@@ -36,18 +41,26 @@ func (m *Map[K, V]) LoadOrStore(k K, v V) (V, bool) {
 	return item.(V), ok
 }
 
-func (m *Map[K, V]) LoadAndDelete(k K) (V, bool) {
+func (m *Map[K, V]) LoadAndDelete(k K) (v V, got bool) {
 	item, loaded := m.innerMap.LoadAndDelete(k)
-	return item.(V), loaded
+	if loaded {
+		return item.(V), loaded
+	} else {
+		return v, false
+	}
 }
 
 func (m *Map[K, V]) Delete(k K) {
 	m.innerMap.Delete(k)
 }
 
-func (m *Map[K, V]) Swap(k K, v V) (V, bool) {
+func (m *Map[K, V]) Swap(k K, v V) (oldValue V, got bool) {
 	item, loaded := m.innerMap.Swap(k, v)
-	return item.(V), loaded
+	if loaded {
+		return item.(V), loaded
+	} else {
+		return oldValue, false
+	}
 }
 
 func (m *Map[K, V]) CompareAndSwap(k K, old, new V) bool {
@@ -64,6 +77,7 @@ func (m *Map[K, V]) Range(rangeFunc func(k K, v V) bool) {
 	})
 }
 
+// Filter filters the Map based on the filterFunc and returns a new Map containing only the key-value pairs that satisfy the filter.
 func (m *Map[K, V]) Filter(filterFunc func(k K, v V) bool) *Map[K, V] {
 	filteredCache := &Map[K, V]{}
 	m.innerMap.Range(func(key, value any) bool {
@@ -77,6 +91,7 @@ func (m *Map[K, V]) Filter(filterFunc func(k K, v V) bool) *Map[K, V] {
 	return filteredCache
 }
 
+// FilterToStream filters the Map based on the filterFunc and converts the filtered results to a stream of CachePair pointers.
 func (m *Map[K, V]) FilterToStream(filterFunc func(k K, v V) bool) stream.Stream[*CachePair[K, V]] {
 	result := stream.Stream[*CachePair[K, V]]{}
 
@@ -92,6 +107,7 @@ func (m *Map[K, V]) FilterToStream(filterFunc func(k K, v V) bool) stream.Stream
 	return result
 }
 
+// ToStream converts the Map to a stream of CachePair pointers.
 func (m *Map[K, V]) ToStream() stream.Stream[*CachePair[K, V]] {
 	result := stream.Stream[*CachePair[K, V]]{}
 
@@ -103,6 +119,7 @@ func (m *Map[K, V]) ToStream() stream.Stream[*CachePair[K, V]] {
 	return result
 }
 
+// ToMap converts the Map to a regular Go map with key-value pairs.
 func (m *Map[K, V]) ToMap() map[K]V {
 	result := make(map[K]V)
 	m.innerMap.Range(func(key, value any) bool {
@@ -112,6 +129,7 @@ func (m *Map[K, V]) ToMap() map[K]V {
 	return result
 }
 
+// Size returns the number of key-value pairs in the Map.
 func (m *Map[K, V]) Size() int {
 	size := 0
 	m.innerMap.Range(func(key, value any) bool {
