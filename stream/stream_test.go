@@ -1248,6 +1248,130 @@ func TestStream_Reverse(t *testing.T) {
 	}
 }
 
+func intEqualFunc(x, y int) (bool, error) {
+	return x == y, nil
+}
+func TestStream_Contains(t *testing.T) {
+	type TestCase struct {
+		name         string
+		stream       Stream[int]
+		value        int
+		equalFunc    func(x, y int) (bool, error)
+		expectErr    error
+		expectResult bool
+	}
+
+	test_error := errors.New("test error")
+
+	testCases := []TestCase{
+		{
+			name:         "contains",
+			stream:       Of([]int{1, 2, 3}),
+			value:        2,
+			equalFunc:    intEqualFunc,
+			expectErr:    nil,
+			expectResult: true,
+		},
+		{
+			name:         "not contains",
+			stream:       Of([]int{1, 2, 3}),
+			value:        4,
+			equalFunc:    intEqualFunc,
+			expectErr:    nil,
+			expectResult: false,
+		},
+		{
+			name:         "empty stream",
+			stream:       Of([]int{}),
+			value:        1,
+			equalFunc:    intEqualFunc,
+			expectErr:    nil,
+			expectResult: false,
+		},
+		{
+			name:         "stream with error",
+			stream:       Stream[int]{err: test_error},
+			value:        1,
+			equalFunc:    intEqualFunc,
+			expectErr:    test_error,
+			expectResult: false,
+		},
+		{
+			name:         "equality function with error",
+			stream:       Of([]int{1, 2, 3}),
+			value:        2,
+			equalFunc:    func(a, b int) (bool, error) { return false, test_error },
+			expectErr:    test_error,
+			expectResult: false,
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			result, err := testCase.stream.Contains(testCase.value, testCase.equalFunc)
+			if !errors.Is(err, testCase.expectErr) {
+				t.Errorf("Expected error %v, but got %v", testCase.expectErr, err)
+			}
+			if result != testCase.expectResult {
+				t.Errorf("Expected result %v, but got %v", testCase.expectResult, result)
+			}
+		})
+	}
+}
+
+func TestMapMethod(t *testing.T) {
+	t.Run("empty stream", func(t *testing.T) {
+		s := Of([]int{})
+		s = s.Map(func(i int) (int, error) {
+			return i * 2, nil
+		})
+		result, _ := s.ToSlice()
+		if result != nil {
+			t.Errorf("got %v want nil", result)
+		}
+	})
+
+	t.Run("non-empty stream no errors", func(t *testing.T) {
+		s := Of([]int{1, 2, 3, 4, 5})
+		s = s.Map(func(i int) (int, error) {
+			return i * 2, nil
+		})
+		result, _ := s.ToSlice()
+		want := []int{2, 4, 6, 8, 10}
+		if !reflect.DeepEqual(result, want) {
+			t.Errorf("got %v want %v", result, want)
+		}
+	})
+
+	t.Run("error in map function", func(t *testing.T) {
+		s := Of([]int{1, 2, 3})
+		s = s.Map(func(i int) (int, error) {
+			if i == 2 {
+				return 0, fmt.Errorf("test error")
+			}
+			return i * 2, nil
+		})
+		_, err := s.ToSlice()
+		if err == nil {
+			t.Error("expected error but got none")
+		}
+	})
+}
+
+func TestStreamWithError(t *testing.T) {
+	testErr := errors.New("test error")
+	errStream := Stream[int]{err: testErr}
+
+	err := errStream.Map(func(i int) (int, error) {
+		return i, nil
+	}).Sort(func(x, y int) int {
+		return x - y
+	}).Err()
+
+	if !errors.Is(err, testErr) {
+		t.Errorf("Expected error: %v, but got: %v", testErr, err)
+	}
+}
+
 func TestMustToAny(t *testing.T) {
 	tests := []struct {
 		name string
