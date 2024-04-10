@@ -41,3 +41,12 @@ func (c *Cache[K, V]) Evict(k K) bool {
 func (c *Cache[K, V]) Clear() {
 	c.innerMap = Map[K, *innerItem[V]]{}
 }
+
+func (c *Cache[K, V]) Keys() (results []K) {
+	c.innerMap.Range(func(k K, v *innerItem[V]) bool {
+		results = append(results, k)
+		return true
+	})
+
+	return
+}
