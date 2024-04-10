@@ -12,6 +12,15 @@ type innerItem[V any] struct {
 	once  sync.Once
 }
 
+func (c *Cache[K, V]) Get(k K) (v V, loaded bool) {
+	item, loaded := c.innerMap.Load(k)
+	if loaded {
+		return item.value, loaded
+	} else {
+		return v, loaded
+	}
+}
+
 // GetOrLoad retrieves the value associated with the specified key from the cache.
 // If the entry does not exist, it calls the provided `loadFunc` function to load the value and store it in the cache.
 // The `loadFunc` function should have the signature `func(k K) (V, error)`.
