@@ -15,7 +15,11 @@ type innerItem[V any] struct {
 func (c *Cache[K, V]) Get(k K) (v V, loaded bool) {
 	item, loaded := c.innerMap.Load(k)
 	if loaded {
-		return item.value, loaded
+		if item.err != nil {
+			return v, false
+		} else {
+			return item.value, loaded
+		}
 	} else {
 		return v, loaded
 	}
