@@ -23,6 +23,13 @@ func (s *Set[T]) Remove(e T) {
 	s.itemList.Remove(e)
 }
 
+func (s *Set[T]) RemoveAt(idx int) {
+	if idx < s.Size() {
+		s.elemMap.Delete(s.itemList.items[idx])
+		s.itemList.RemoveAt(idx)
+	}
+}
+
 func (s *Set[T]) Clear() {
 	s.itemList.Clear()
 	s.elemMap = sync.Map{}
