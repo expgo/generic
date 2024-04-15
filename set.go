@@ -10,6 +10,10 @@ type Set[T comparable] struct {
 	elemMap  sync.Map
 }
 
+func (s *Set[T]) At(idx int) (t T, err error) {
+	return s.itemList.At(idx)
+}
+
 func (s *Set[T]) Add(e T) bool {
 	_, loaded := s.elemMap.LoadOrStore(e, true)
 	if !loaded {

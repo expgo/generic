@@ -1,7 +1,17 @@
 package generic
 
+import "errors"
+
 type List[T comparable] struct {
 	items []T
+}
+
+func (l *List[T]) At(idx int) (t T, err error) {
+	if idx >= l.Size() {
+		return t, errors.New("index out of range")
+	}
+
+	return l.items[idx], nil
 }
 
 func (l *List[T]) Add(e T) bool {
