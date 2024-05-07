@@ -14,20 +14,6 @@ func Filter[E any](s []E, filterFunc func(E) bool) (ret []E) {
 	return
 }
 
-func Map[E1, E2 any](s1 []E1, mapFunc func(E1) E2) (s2 []E2) {
-	for _, e1 := range s1 {
-		s2 = append(s2, mapFunc(e1))
-	}
-	return s2
-}
-
-func MapToAny[E any](s []E) (ret []any) {
-	for _, e := range s {
-		ret = append(ret, e)
-	}
-	return ret
-}
-
 func Shuffle[E any](s []E) (ret []E) {
 	if len(s) == 0 {
 		return
@@ -46,4 +32,80 @@ func Shuffle[E any](s []E) (ret []E) {
 	}
 
 	return ret
+}
+
+func GroupBy[E any, K comparable](s []E, getKey func(E) K) map[K][]E {
+	result := make(map[K][]E)
+
+	for _, v := range s {
+		key := getKey(v)
+		if _, ok := result[key]; !ok {
+			result[key] = []E{v}
+		} else {
+			result[key] = append(result[key], v)
+		}
+	}
+
+	return result
+}
+
+func Limit[E any](s []E, n int) []E {
+	if n < 0 {
+		n = 0
+	} else if n > len(s) {
+		n = len(s)
+	}
+	return s[:n]
+}
+
+func Skip[E any](s []E, n int) []E {
+	if n < 0 {
+		n = 0
+	} else if n > len(s) {
+		n = len(s)
+	}
+	return s[n:]
+}
+
+func MustMap[E1, E2 any](s1 []E1, mapFunc func(E1) E2) (s2 []E2) {
+	for _, e1 := range s1 {
+		s2 = append(s2, mapFunc(e1))
+	}
+	return s2
+}
+
+func Map[E1, E2 any](s1 []E1, mapFunc func(E1) (E2, error)) (s2 []E2, e error) {
+	for _, e1 := range s1 {
+		e2, err := mapFunc(e1)
+		if err != nil {
+			return nil, err
+		}
+		s2 = append(s2, e2)
+	}
+	return s2, nil
+}
+
+func ToAny[E any](s []E) (ret []any) {
+	for _, e := range s {
+		ret = append(ret, e)
+	}
+	return ret
+}
+
+func AllMatch[E any](s []E, matchFunc func(E) bool) bool {
+	for _, elem := range s {
+		if !matchFunc(elem) {
+			return false
+		}
+	}
+	return true
+}
+
+func AnyMatch[E any](s []E, matchFunc func(E) bool) bool {
+	for _, elem := range s {
+		if matchFunc(elem) {
+			return true
+		}
+	}
+	return false
 }
