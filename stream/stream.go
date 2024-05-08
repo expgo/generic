@@ -5,6 +5,24 @@ import (
 	"time"
 )
 
+func Limit[E any](s []E, n int) []E {
+	if n < 0 {
+		n = 0
+	} else if n > len(s) {
+		n = len(s)
+	}
+	return s[:n]
+}
+
+func Skip[E any](s []E, n int) []E {
+	if n < 0 {
+		n = 0
+	} else if n > len(s) {
+		n = len(s)
+	}
+	return s[n:]
+}
+
 func Filter[E any](s []E, filterFunc func(E) bool) (ret []E) {
 	for _, v := range s {
 		if filterFunc(v) {
@@ -34,37 +52,47 @@ func Shuffle[E any](s []E) (ret []E) {
 	return ret
 }
 
-func GroupBy[E any, K comparable](s []E, getKey func(E) K) map[K][]E {
-	result := make(map[K][]E)
-
-	for _, v := range s {
-		key := getKey(v)
-		if _, ok := result[key]; !ok {
-			result[key] = []E{v}
-		} else {
-			result[key] = append(result[key], v)
+func AllMatch[E comparable](s []E, e E) bool {
+	for _, elem := range s {
+		if elem != e {
+			return false
 		}
 	}
-
-	return result
+	return true
 }
 
-func Limit[E any](s []E, n int) []E {
-	if n < 0 {
-		n = 0
-	} else if n > len(s) {
-		n = len(s)
+func AllMatchFunc[E any](s []E, matchFunc func(E) bool) bool {
+	for _, elem := range s {
+		if !matchFunc(elem) {
+			return false
+		}
 	}
-	return s[:n]
+	return true
 }
 
-func Skip[E any](s []E, n int) []E {
-	if n < 0 {
-		n = 0
-	} else if n > len(s) {
-		n = len(s)
+func AnyMatch[E comparable](s []E, e E) bool {
+	for _, elem := range s {
+		if elem == e {
+			return true
+		}
 	}
-	return s[n:]
+	return false
+}
+
+func AnyMatchFunc[E any](s []E, matchFunc func(E) bool) bool {
+	for _, elem := range s {
+		if matchFunc(elem) {
+			return true
+		}
+	}
+	return false
+}
+
+func ToAny[E any](s []E) (ret []any) {
+	for _, e := range s {
+		ret = append(ret, e)
+	}
+	return ret
 }
 
 func MustMap[E1, E2 any](s1 []E1, mapFunc func(E1) E2) (s2 []E2) {
@@ -85,27 +113,17 @@ func Map[E1, E2 any](s1 []E1, mapFunc func(E1) (E2, error)) (s2 []E2, e error) {
 	return s2, nil
 }
 
-func ToAny[E any](s []E) (ret []any) {
-	for _, e := range s {
-		ret = append(ret, e)
-	}
-	return ret
-}
+func GroupBy[E any, K comparable](s []E, getKey func(E) K) map[K][]E {
+	result := make(map[K][]E)
 
-func AllMatch[E any](s []E, matchFunc func(E) bool) bool {
-	for _, elem := range s {
-		if !matchFunc(elem) {
-			return false
+	for _, v := range s {
+		key := getKey(v)
+		if _, ok := result[key]; !ok {
+			result[key] = []E{v}
+		} else {
+			result[key] = append(result[key], v)
 		}
 	}
-	return true
-}
 
-func AnyMatch[E any](s []E, matchFunc func(E) bool) bool {
-	for _, elem := range s {
-		if matchFunc(elem) {
-			return true
-		}
-	}
-	return false
+	return result
 }
