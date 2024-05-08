@@ -106,7 +106,7 @@ func TestMap(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			// Call the function and check the output
-			result := Map(testCase.input, testCase.mapFunc)
+			result := MustMap(testCase.input, testCase.mapFunc)
 			if !reflect.DeepEqual(result, testCase.expected) {
 				t.Errorf("Failed test '%s': got %v, expected %v", testCase.name, result, testCase.expected)
 			}
@@ -133,7 +133,7 @@ func TestMapToAny(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := MapToAny(tt.input); !reflect.DeepEqual(got, tt.want) {
+			if got := ToAny(tt.input); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("MapToAny() = %v, want %v", got, tt.want)
 			}
 		})
