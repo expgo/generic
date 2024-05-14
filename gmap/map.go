@@ -72,6 +72,16 @@ func Delete[K comparable, V any](m *Map[K, V], key K) {
 	delete(m.items, key)
 }
 
+func Swap[K comparable, V any](m *Map[K, V], key K, value V) (previous V, loaded bool) {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+
+	previous, loaded = m.items[key]
+	m.items[key] = value
+
+	return
+}
+
 func Range[K comparable, V any](m *Map[K, V], f func(key K, value V) bool) {
 	m.lock.RLock()
 	mm := Clone(m.items)
