@@ -1,6 +1,9 @@
 package generic
 
-import "sync"
+import (
+	"errors"
+	"sync"
+)
 
 type Cache[K comparable, V any] struct {
 	innerMap sync.Map
@@ -17,7 +20,7 @@ type innerItem[V any] struct {
 // The `loadFunc` function should have the signature `func(k K) (V, error)`.
 func (c *Cache[K, V]) GetOrLoad(k K, loadFunc func(k K) (V, error)) (v V, err error) {
 	if loadFunc == nil {
-		panic("load function must not be nil")
+		panic(errors.New("load function must not be nil"))
 	}
 
 	item, _ := c.innerMap.LoadOrStore(k, &innerItem[V]{})
