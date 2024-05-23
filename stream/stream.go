@@ -53,12 +53,12 @@ func Shuffle[E any](s []E) (ret []E) {
 }
 
 func Distinct[E comparable](s []E) []E {
-	seen := make(map[E]bool)
+	seen := make(map[E]struct{})
 	ret := make([]E, 0, len(s))
 	for _, v := range s {
-		if !seen[v] {
+		if _, ok := seen[v]; !ok {
 			ret = append(ret, v)
-			seen[v] = true
+			seen[v] = struct{}{}
 		}
 	}
 	return ret
