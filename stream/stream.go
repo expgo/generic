@@ -52,6 +52,43 @@ func Shuffle[E any](s []E) (ret []E) {
 	return ret
 }
 
+func Distinct[E comparable](s []E) []E {
+	seen := make(map[E]bool)
+	ret := make([]E, 0, len(s))
+	for _, v := range s {
+		if !seen[v] {
+			ret = append(ret, v)
+			seen[v] = true
+		}
+	}
+	return ret
+}
+
+func DistinctFunc[E any](s []E, matchFunc func(preItem, nextItem E) bool) []E {
+	ret := make([]E, 0, len(s))
+
+	if len(s) == 0 {
+		return ret
+	}
+
+	ret = append(ret, s[0])
+
+	for _, newItem := range s[1:] {
+		unique := true
+		for _, existingItem := range ret {
+			if matchFunc(existingItem, newItem) {
+				unique = false
+				break
+			}
+		}
+		if unique {
+			ret = append(ret, newItem)
+		}
+	}
+
+	return ret
+}
+
 func AllMatch[E comparable](s []E, e E) bool {
 	for _, elem := range s {
 		if elem != e {

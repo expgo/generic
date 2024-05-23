@@ -637,3 +637,93 @@ func TestGroupBy(t *testing.T) {
 		})
 	}
 }
+
+func TestDistinct(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    []int
+		expected []int
+	}{
+		{
+			name:     "TestDistinct_AllUniqueItems",
+			input:    []int{1, 2, 3, 4, 5},
+			expected: []int{1, 2, 3, 4, 5},
+		},
+		{
+			name:     "TestDistinct_SomeDuplicateItems",
+			input:    []int{1, 2, 2, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 5},
+			expected: []int{1, 2, 3, 4, 5},
+		},
+		{
+			name:     "TestDistinct_AllSameItems",
+			input:    []int{1, 1, 1, 1, 1, 1, 1, 1},
+			expected: []int{1},
+		},
+		{
+			name:     "TestDistinct_EmptySlice",
+			input:    []int{},
+			expected: []int{},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			result := Distinct(test.input)
+			if !reflect.DeepEqual(result, test.expected) {
+				t.Errorf("Distinct got %v, want %v", result, test.expected)
+			}
+		})
+	}
+}
+
+func TestDistinctFunc(t *testing.T) {
+	match := func(preItem, nextItem int) bool {
+		return preItem == nextItem
+	}
+
+	cases := []struct {
+		name      string
+		input     []int
+		matchFunc func(preItem, nextItem int) bool
+		expected  []int
+	}{
+		{
+			name:      "empty slice",
+			input:     []int{},
+			matchFunc: match,
+			expected:  []int{},
+		},
+		{
+			name:      "single element slice",
+			input:     []int{1},
+			matchFunc: match,
+			expected:  []int{1},
+		},
+		{
+			name:      "two different element slice",
+			input:     []int{1, 2},
+			matchFunc: match,
+			expected:  []int{1, 2},
+		},
+		{
+			name:      "two same element slice",
+			input:     []int{2, 2},
+			matchFunc: match,
+			expected:  []int{2},
+		},
+		{
+			name:      "multiple element slice with duplicates",
+			input:     []int{1, 2, 2, 3, 1, 4},
+			matchFunc: match,
+			expected:  []int{1, 2, 3, 4},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			result := DistinctFunc(tc.input, tc.matchFunc)
+			if !reflect.DeepEqual(result, tc.expected) {
+				t.Errorf("DistinctFunc(%v) = %v; expected %v", tc.input, result, tc.expected)
+			}
+		})
+	}
+}
