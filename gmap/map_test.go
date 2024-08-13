@@ -254,3 +254,47 @@ func TestSwap(t *testing.T) {
 		})
 	}
 }
+
+func TestSize(t *testing.T) {
+	tests := []struct {
+		name     string
+		setupMap func() *Map[int, int]
+		want     int
+	}{
+		{
+			name: "empty map",
+			setupMap: func() *Map[int, int] {
+				return NewMap[int, int]()
+			},
+			want: 0,
+		},
+		{
+			name: "map with one item",
+			setupMap: func() *Map[int, int] {
+				m := NewMap[int, int]()
+				Store(m, 1, 1)
+				return m
+			},
+			want: 1,
+		},
+		{
+			name: "map with multiple items",
+			setupMap: func() *Map[int, int] {
+				m := NewMap[int, int]()
+				Store(m, 1, 1)
+				Store(m, 2, 2)
+				Store(m, 3, 3)
+				return m
+			},
+			want: 3,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := tt.setupMap()
+			got := Size(m)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}

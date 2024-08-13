@@ -93,3 +93,12 @@ func Range[K comparable, V any](m *Map[K, V], f func(key K, value V) bool) {
 		}
 	}
 }
+
+func Size[K comparable, V any](m *Map[K, V]) int {
+	size := 0
+	Range(m, func(key K, value V) bool {
+		size += 1
+		return true
+	})
+	return size
+}
