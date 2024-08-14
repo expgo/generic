@@ -169,3 +169,65 @@ func compareSlices(s1, s2 []int) bool {
 	}
 	return true
 }
+
+func TestFilter(t *testing.T) {
+	// Define test cases
+	testCases := []struct {
+		name      string
+		input     []int
+		matchFunc func(int) bool
+		expected  []int
+	}{
+		{
+			name:  "Simple",
+			input: []int{1, 2, 3, 4, 5},
+			matchFunc: func(i int) bool {
+				return i%2 == 0
+			},
+			expected: []int{2, 4},
+		},
+		{
+			name:  "Empty",
+			input: []int{},
+			matchFunc: func(i int) bool {
+				return i%2 == 0
+			},
+			expected: []int{},
+		},
+		{
+			name:  "AllMatch",
+			input: []int{2, 4, 6, 8, 10},
+			matchFunc: func(i int) bool {
+				return i%2 == 0
+			},
+			expected: []int{2, 4, 6, 8, 10},
+		},
+		{
+			name:  "NoneMatch",
+			input: []int{1, 3, 5, 7, 9},
+			matchFunc: func(i int) bool {
+				return i%2 == 0
+			},
+			expected: []int{},
+		},
+	}
+
+	// Run each test case
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			result := Filter(tc.input, tc.matchFunc)
+
+			// Check the length of the result and expected slice
+			if len(result) != len(tc.expected) {
+				t.Errorf("expected length %d, got %d", len(tc.expected), len(result))
+			}
+
+			// Check each element of the result and expected slice
+			for i := range result {
+				if result[i] != tc.expected[i] {
+					t.Errorf("at index %d: expected %d, got %d", i, tc.expected[i], result[i])
+				}
+			}
+		})
+	}
+}

@@ -44,3 +44,15 @@ func DeleteFunc[E any](s []E, e E, matchFunc func(E) bool) ([]E, bool) {
 
 	return s, false
 }
+
+func Filter[E comparable](s []E, matchFunc func(E) bool) []E {
+	ret := make([]E, 0, len(s))
+
+	for _, ee := range s {
+		if matchFunc(ee) {
+			ret = append(ret, ee)
+		}
+	}
+
+	return ret
+}
